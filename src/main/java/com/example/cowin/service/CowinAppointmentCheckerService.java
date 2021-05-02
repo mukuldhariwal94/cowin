@@ -8,6 +8,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.example.cowin.model.CowinAppointmentAvailabilityResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
@@ -18,6 +20,11 @@ import java.util.Arrays;
 import java.util.List;
 
 @Component
+/**
+ * Appointment service checker.
+ *
+ * @author mukul dhariwal
+ */
 public class CowinAppointmentCheckerService {
 
     private static final String COWIN_API_ENDPOINT = "https://cdn-api.co-vin.in/api/v2/";
@@ -25,16 +32,17 @@ public class CowinAppointmentCheckerService {
     private static final Logger LOGGER = LoggerFactory.getLogger(CowinAppointmentCheckerService.class);
     // bangalore urban, bbmp, bangalore rural
     private static final List<String> districtsToCheck = Arrays.asList("265", "294", "276");
+    @Autowired
+    private JavaMailSender javaMailSender;
 
     public ApplicationResponseAvailableSlots getTodayAvailableSlotsAndMail() {
         ApplicationResponseAvailableSlots applicationResponseAvailableSlots = new ApplicationResponseAvailableSlots();
         RestTemplate restTemplate = new RestTemplate();
-        String today = LocalDate.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy"));
+        String today = LocalDate.now().minusDays(2).format(DateTimeFormatter.ofPattern("dd-MM-yyyy"));
         List<CowinResponseCenters> filteredCenters = new ArrayList<>();
         try {
             for (String district : districtsToCheck) {
                 String finalEndpoint = COWIN_API_ENDPOINT + String.format(APPOINTMENT_ENDPOINT, district, today);
-
                 LOGGER.info("Hitting endpoint {}", finalEndpoint);
                 String result = restTemplate.getForObject(finalEndpoint, String.class);
                 ObjectMapper mapper = new ObjectMapper();

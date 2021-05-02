@@ -16,17 +16,16 @@ public class SpringConfig {
     @Bean
     public JavaMailSender getJavaMailSender() {
         JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
-        mailSender.setHost("smtp.gmail.com");
+        mailSender.setHost("smtp.sendgrid.net");
         mailSender.setPort(587);
-
-        mailSender.setUsername("my.gmail@gmail.com");
-        mailSender.setPassword("password");
-
+        mailSender.setUsername("apikey");
+        mailSender.setPassword("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");
         Properties props = mailSender.getJavaMailProperties();
         props.put("mail.transport.protocol", "smtp");
         props.put("mail.smtp.auth", "true");
         props.put("mail.smtp.starttls.enable", "true");
         props.put("mail.debug", "true");
+        mailSender.setJavaMailProperties(props);
 
         return mailSender;
     }
