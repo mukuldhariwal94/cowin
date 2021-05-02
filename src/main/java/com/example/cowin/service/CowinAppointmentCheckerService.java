@@ -1,5 +1,8 @@
 package com.example.cowin.service;
 
+import com.example.cowin.model.ApplicationResponseAvailableSlots;
+import com.example.cowin.model.CowinResponseAppointmentSession;
+import com.example.cowin.model.CowinResponseCenters;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.example.cowin.model.CowinAppointmentAvailabilityResponse;
@@ -10,29 +13,57 @@ import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 @Component
 public class CowinAppointmentCheckerService {
 
     private static final String COWIN_API_ENDPOINT = "https://cdn-api.co-vin.in/api/v2/";
-    private static final String APPOINTMENT_ENDPOINT = "appointment/sessions/public/calendarByDistrict?district_id=265&date=";
+    private String APPOINTMENT_ENDPOINT = "appointment/sessions/public/calendarByDistrict?district_id=%s&date=%s";
     private static final Logger LOGGER = LoggerFactory.getLogger(CowinAppointmentCheckerService.class);
+    // bangalore urban, bbmp, bangalore rural
+    private static final List<String> districtsToCheck = Arrays.asList("265", "294", "276");
 
-
-    public void getTodayAvailableSlotsAndMail()
-    {
+    public ApplicationResponseAvailableSlots getTodayAvailableSlotsAndMail() {
+        ApplicationResponseAvailableSlots applicationResponseAvailableSlots = new ApplicationResponseAvailableSlots();
+        RestTemplate restTemplate = new RestTemplate();
+        String today = LocalDate.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy"));
+        List<CowinResponseCenters> filteredCenters = new ArrayList<>();
         try {
-            String today = LocalDate.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy"));
-            RestTemplate restTemplate = new RestTemplate();
-            String result = restTemplate.getForObject(COWIN_API_ENDPOINT + APPOINTMENT_ENDPOINT + today, String.class);
-            ObjectMapper mapper = new ObjectMapper();
-            mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-            CowinAppointmentAvailabilityResponse response = mapper.readValue(result, CowinAppointmentAvailabilityResponse.class);
-            System.out.println(response.toString());
+            for (String district : districtsToCheck) {
+                String finalEndpoint = COWIN_API_ENDPOINT + String.format(APPOINTMENT_ENDPOINT, district, today);
+
+                LOGGER.info("Hitting endpoint {}", finalEndpoint);
+                String result = restTemplate.getForObject(finalEndpoint, String.class);
+                ObjectMapper mapper = new ObjectMapper();
+                mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+                CowinAppointmentAvailabilityResponse response = mapper.readValue(result, CowinAppointmentAvailabilityResponse.class);
+                for (CowinResponseCenters center : response.getCenters()) {
+                    if (!center.getSessions().isEmpty()) {
+
+                        for (CowinResponseAppointmentSession cowinResponseAppointmentSession : center.getSessions()) {
+                            Integer age_limit = Integer.parseInt(cowinResponseAppointmentSession.getMin_age_limit());
+                            Double available_capacity = Double.parseDouble(cowinResponseAppointmentSession.getAvailable_capacity());
+                            if (age_limit < 45 && available_capacity > 0) {
+                                filteredCenters.add(center);
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (!filteredCenters.isEmpty()) {
+                System.out.println(filteredCenters.toString());
+            }
+            applicationResponseAvailableSlots.setCenters(filteredCenters);
+            return applicationResponseAvailableSlots;
+        } catch (Exception e) {
+            e.printStackTrace();
+            LOGGER.error("error while getting data");
         }
-        catch(Exception e)
-        {
-            LOGGER.error(e.getMessage());
-        }
+
+        return null;
     }
 }
