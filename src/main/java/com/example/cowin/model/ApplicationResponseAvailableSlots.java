@@ -1,4 +1,4 @@
-package model;
+package com.example.cowin.model;
 
 import java.util.List;
 

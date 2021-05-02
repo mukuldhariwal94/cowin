@@ -1,4 +1,4 @@
-package model;
+package com.example.cowin.model;
 
 import java.util.List;
 
@@ -50,4 +50,10 @@ public class CowinAppointmentAvailabilityResponse {
 
     List<CowinResponseCenters> centers;
 
+    @Override
+    public String toString() {
+        return "CowinAppointmentAvailabilityResponse{" +
+                "centers=" + centers +
+                '}';
+    }
 }

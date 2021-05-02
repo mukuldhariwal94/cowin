@@ -3,8 +3,8 @@ package com.example.cowin;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import model.ApplicationResponseAvailableSlots;
-import model.CowinAppointmentAvailabilityResponse;
+import com.example.cowin.model.ApplicationResponseAvailableSlots;
+import com.example.cowin.model.CowinAppointmentAvailabilityResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
@@ -29,7 +29,6 @@ public class CowinRestController {
     @GetMapping("getAvailableSlots")
     public ResponseEntity<ApplicationResponseAvailableSlots> getAvailableSlots() throws JsonProcessingException {
         String today = LocalDate.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy"));
-
         RestTemplate restTemplate = new RestTemplate();
         String result = restTemplate.getForObject(COWIN_API_ENDPOINT + APPOINTMENT_ENDPOINT + today, String.class);
         ObjectMapper mapper = new ObjectMapper();

@@ -1,4 +1,4 @@
-package model;
+package com.example.cowin.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
