@@ -25,13 +25,9 @@ public class ScheduledAvailabilityChecker {
     @Autowired
     private EmailAlerter emailAlerter;
 
-    @Scheduled(fixedRate = THIRTY_MINUTES, initialDelay = 0)
+    @Scheduled(fixedRate = THIRTY_MINUTES, initialDelay = 10000)
     public void scheduledAppointmentChecker() {
         LOGGER.info("Starting to check");
         ApplicationResponseAvailableSlots todayAvailableSlotsAndMail = cowinAppointmentCheckerService.getTodayAvailableSlotsAndMail();
-
-        if (todayAvailableSlotsAndMail == null) {
-            emailAlerter.notifyAdminOfNoSlots();
-        }
     }
 }

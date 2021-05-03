@@ -22,7 +22,7 @@ public class EmailAlerter {
     @Autowired
     private JavaMailSender javaMailSender;
     private static final String[] recipients = new String[]{"priyal.dhariwal94@gmail.com", "ashishdhariwal95@gmail.com",
-            "yashsankhlecha7@gmail.com", "ty123ty45@gmail.com"};
+            "yashsankhlecha7@gmail.com", "ty123ty45@gmail.com", "mukul.dhariwal94@gmail.com"};
 
     public void sendEmail(List<CowinResponseCenters> filteredCenters) throws MessagingException {
         MimeMessage mimeMessage = javaMailSender.createMimeMessage();
@@ -32,6 +32,7 @@ public class EmailAlerter {
         helper.setTo(recipients);
         helper.setSubject("Vaccine availability checker");
         helper.setFrom("mukul.dhariwal94@gmail.com");
+        //javaMailSender.send(mimeMessage);
     }
 
     private String getHTMLMessage(List<CowinResponseCenters> filteredCenters) {
@@ -115,8 +116,5 @@ public class EmailAlerter {
 
         sb.append("</table>");
         return sb.toString();
-    }
-
-    public void notifyAdminOfNoSlots() {
     }
 }

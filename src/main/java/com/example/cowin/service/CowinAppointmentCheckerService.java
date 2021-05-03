@@ -40,8 +40,6 @@ public class CowinAppointmentCheckerService {
     @Autowired
     private ObjectMapper mapper;
 
-    @Autowired
-
     public ApplicationResponseAvailableSlots getTodayAvailableSlotsAndMail() {
         ApplicationResponseAvailableSlots applicationResponseAvailableSlots = new ApplicationResponseAvailableSlots();
         String today = LocalDate.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy"));
