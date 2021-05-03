@@ -1,5 +1,6 @@
 package com.example.cowin.service;
 
+import com.example.cowin.mail.sender.EmailAlerter;
 import com.example.cowin.model.ApplicationResponseAvailableSlots;
 import com.example.cowin.model.CowinResponseAppointmentSession;
 import com.example.cowin.model.CowinResponseCenters;
@@ -33,24 +34,27 @@ public class CowinAppointmentCheckerService {
     // bangalore urban, bbmp, bangalore rural
     private static final List<String> districtsToCheck = Arrays.asList("265", "294", "276");
     @Autowired
-    private JavaMailSender javaMailSender;
+    private EmailAlerter emailAlerter;
+    @Autowired
+    private RestTemplate restTemplate;
+    @Autowired
+    private ObjectMapper mapper;
+
+    @Autowired
 
     public ApplicationResponseAvailableSlots getTodayAvailableSlotsAndMail() {
         ApplicationResponseAvailableSlots applicationResponseAvailableSlots = new ApplicationResponseAvailableSlots();
-        RestTemplate restTemplate = new RestTemplate();
-        String today = LocalDate.now().minusDays(2).format(DateTimeFormatter.ofPattern("dd-MM-yyyy"));
+        String today = LocalDate.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy"));
         List<CowinResponseCenters> filteredCenters = new ArrayList<>();
         try {
             for (String district : districtsToCheck) {
                 String finalEndpoint = COWIN_API_ENDPOINT + String.format(APPOINTMENT_ENDPOINT, district, today);
                 LOGGER.info("Hitting endpoint {}", finalEndpoint);
                 String result = restTemplate.getForObject(finalEndpoint, String.class);
-                ObjectMapper mapper = new ObjectMapper();
                 mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
                 CowinAppointmentAvailabilityResponse response = mapper.readValue(result, CowinAppointmentAvailabilityResponse.class);
                 for (CowinResponseCenters center : response.getCenters()) {
                     if (!center.getSessions().isEmpty()) {
-
                         for (CowinResponseAppointmentSession cowinResponseAppointmentSession : center.getSessions()) {
                             Integer age_limit = Integer.parseInt(cowinResponseAppointmentSession.getMin_age_limit());
                             Double available_capacity = Double.parseDouble(cowinResponseAppointmentSession.getAvailable_capacity());
@@ -63,7 +67,9 @@ public class CowinAppointmentCheckerService {
             }
 
             if (!filteredCenters.isEmpty()) {
-                System.out.println(filteredCenters.toString());
+                emailAlerter.sendEmail(filteredCenters);
+            } else {
+                LOGGER.info("No centers are giving vaccine right now");
             }
             applicationResponseAvailableSlots.setCenters(filteredCenters);
             return applicationResponseAvailableSlots;
