@@ -18,14 +18,14 @@ import com.example.cowin.service.CowinAppointmentCheckerService;
 @Component
 public class ScheduledAvailabilityChecker {
 
-    private static final int THIRTY_MINUTES = 1000 * 60 * 30;
+    private static final int FIVE_MINUTES = 1000 * 60 * 5;
     private static final Logger LOGGER = LoggerFactory.getLogger(ScheduledAvailabilityChecker.class);
     @Autowired
     private CowinAppointmentCheckerService cowinAppointmentCheckerService;
     @Autowired
     private EmailAlerter emailAlerter;
 
-    @Scheduled(fixedRate = THIRTY_MINUTES, initialDelay = 10000)
+    @Scheduled(fixedRate = FIVE_MINUTES, initialDelay = 10000)
     public void scheduledAppointmentChecker() {
         LOGGER.info("Starting to check");
         ApplicationResponseAvailableSlots todayAvailableSlotsAndMail = cowinAppointmentCheckerService.getTodayAvailableSlotsAndMail();
