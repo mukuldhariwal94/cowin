@@ -18,7 +18,7 @@ import com.example.cowin.service.CowinAppointmentCheckerService;
 @Component
 public class ScheduledAvailabilityChecker {
 
-    private static final int FIVE_MINUTES = 1000 * 60 * 5;
+    private static final int FIVE_MINUTES = 1000;
     private static final Logger LOGGER = LoggerFactory.getLogger(ScheduledAvailabilityChecker.class);
     @Autowired
     private CowinAppointmentCheckerService cowinAppointmentCheckerService;

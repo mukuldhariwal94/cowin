@@ -32,7 +32,7 @@ public class EmailAlerter {
         helper.setTo(recipients);
         helper.setSubject("Vaccine availability checker");
         helper.setFrom("mukul.dhariwal94@gmail.com");
-        //javaMailSender.send(mimeMessage);
+        javaMailSender.send(mimeMessage);
     }
 
     private String getHTMLMessage(List<CowinResponseCenters> filteredCenters) {
